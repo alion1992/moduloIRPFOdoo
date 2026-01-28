@@ -1,0 +1,125 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+    <!-- VISTAS TREE -->
+    <record model="ir.ui.view" id="calcirpf.responsables_list">
+      <field name="name">Responsables</field>
+      <field name="model">calcirpf.responsable</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="nombre"/>
+          <field name="apellido1"/>
+          <field name="apellido2"/>
+        </tree>
+      </field>
+    </record>
+
+    <record model="ir.ui.view" id="calcirpf.calcula_list">
+      <field name="name">Responsables</field>
+      <field name="model">calcirpf.calculo</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="nombre"/>
+          <field name="apellidos"/>
+          <field name="situacionActual"/>
+        </tree>
+      </field>
+    </record>
+
+    <!--FORMULARIOS-->
+    <record model="ir.ui.view" id="clientes_form_view">
+    <field name="name">Responsable</field>
+    <field name="model">calcirpf.responsable</field>
+    <field name="arch" type="xml">
+        <form string="Cliente">
+            <sheet>
+                <group>
+                    <field name="nombre"/>
+                    <field name="apellido1"/>
+                    <field name="apellido2"/>
+                    <field name="nombreCompleto"/>
+                    <field name="fecha_nacimiento"/>
+                    <field name="edad"/>
+                    
+                </group>
+            </sheet>
+        </form>
+    </field>
+    </record>
+
+    <record model="ir.ui.view" id="clientes_form_view_calc">
+    <field name="name">Calculadora</field>
+    <field name="model">calcirpf.calculo</field>
+    <field name="arch" type="xml">
+        <form string="Calculadora">
+            <sheet>
+                <group>
+                    <field name="nombre"/>
+                    <field name="apellidos"/>
+                    <field name="salarioBruto"/>
+                    <field name="edad"/>
+                    <field name="situacionActual"/>
+                    <field name="numeroPagas"/>
+                    <field name="irpf"/>
+                    <field name="salario_mensual"/>
+                    <field name="hijos"/>
+                    <field name="pagas_extra"/>
+                    <field name="responsable_id"/>
+                </group>
+            </sheet>
+        </form>
+    </field>
+    </record>
+
+    
+    <!-- ACTIONS -->
+
+    <record model="ir.actions.act_window" id="calcirpf.action_window">
+      <field name="name">Responsables</field>
+      <field name="res_model">calcirpf.responsable</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record model="ir.actions.act_window" id="calcirpf.action_window_calc">
+      <field name="name">Calculadora</field>
+      <field name="res_model">calcirpf.calculo</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <!-- server action to the one above -->
+<!--
+    <record model="ir.actions.server" id="calcirpf.action_server">
+      <field name="name">calcirpf server</field>
+      <field name="model_id" ref="model_calcirpf_calcirpf"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": model._name,
+        }
+      </field>
+    </record>
+-->
+
+    <!-- Top menu item -->
+
+    <menuitem name="Calculadora IRPF" id="calcirpf.menu_root"/>
+
+    <!-- menu categories -->
+
+    <menuitem name="Opciones" id="calcirpf.menu_1" parent="calcirpf.menu_root"/>
+   
+    <menuitem name="Responsable" id="calcirpf.menu_1_1" parent="calcirpf.menu_1"/>
+    <menuitem name="Calculadora Irpf" id="calcirpf.menu_1_2" parent="calcirpf.menu_1"/>
+    
+
+    <menuitem name="Responsables" id="calcirpf.menu_1_list" parent="calcirpf.menu_1_1"
+              action="calcirpf.action_window"/>
+    <menuitem name="Calculadora" id="calcirpf.menu_2_list" parent="calcirpf.menu_1_2"
+              action="calcirpf.action_window_calc"/>
+    
+
+  </data>
+</odoo>
