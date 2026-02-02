@@ -2,6 +2,10 @@
 from datetime import datetime
 from odoo import models, fields, api
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 class calcirpf(models.Model):
     _name = 'calcirpf.responsable'
@@ -55,38 +59,100 @@ class calculo(models.Model):
     numeroPagas = fields.Selection([('12','12'),('14','14')],string="Número de pagas",default='12')
     responsable_id = fields.Many2one('calcirpf.responsable')
     irpf = fields.Integer(string="%IRPF",compute="_compute_irpf",
-        store=False)
-    salario_mensual = fields.Integer()
-    pagas_extra = fields.Integer()
+        store=False,required=True)
+    salario_mensual = fields.Integer(compute="_compute_salario_mensual")
+    pagas_extra = fields.Integer(compute="_compute_paga_extra")
+    etiquetas = fields.Many2many('calcirpf.etiqueta')
 
     @api.depends('salarioBruto','numeroPagas','situacionActual','hijos')
     def _compute_irpf(self):
         for calculo in self:
-            match self.salarioBruto:
+            match calculo.salarioBruto:
                 case s if s >= 0 and s < 12450:
-                    self.irpf = 19
+                    calculo.irpf = 19
                 case s if s >= 12450 and s < 20000:
-                    self.irpf = 24
+                    calculo.irpf = 24
                 case s if s >= 20200 and s < 35200:
-                    self.irpf = 30
+                    calculo.irpf = 30
                 case s if s >= 35200 and s < 60000:
-                    self.irpf = 37
+                    calculo.irpf = 37
                 case s if s >= 60000 and s < 300000:
-                    self.irpf = 45
+                    calculo.irpf = 45
                 case s if s >= 300000:
-                    self.irpf = 47
+                    calculo.irpf = 47
 
-        if self.situacionActual == 'trabajador':
-            if int(self.hijos) == 1:
-                self.irpf = self.irpf - 2
-            elif int(self.hijos) == 2:
-                self.irpf = self.irpf - 4
-            elif int(self.hijos) == 4:
-                self.irpf = self.irpf -5
+        if calculo.situacionActual == 'trabajador':
+            if int(calculo.hijos) == 1:
+                calculo.irpf = calculo.irpf - 2
+            elif int(calculo.hijos) == 2:
+                calculo.irpf = calculo.irpf - 4
+            elif int(calculo.hijos) == 4:
+                calculo.irpf = calculo.irpf -5
         else:
-            self.irpf = self.irpf*0.70
+            calculo.irpf = calculo.irpf*0.70
+    
+    @api.depends('salarioBruto','irpf','numeroPagas')
+    def _compute_salario_mensual(self):
+        for calculo in self:
+            if calculo.numeroPagas == '12':
+                calculo.salario_mensual = calculo.salarioBruto/12 * ((100-calculo.irpf)/100)
+            else:
+                calculo.salario_mensual = calculo.salarioBruto/14 * ((100-calculo.irpf)/100)
+
+    @api.depends('salario_mensual','numeroPagas')     
+    def _compute_paga_extra(self):
+        for calculo in self:
+            if calculo.numeroPagas == '14':
+                calculo.pagas_extra = calculo.salarioBruto/12 * ((100-calculo.irpf-5)/100)
+            else:
+                calculo.pagas_extra = 0
+              
+
+    @api.model
+    def create(self, vals):
+        
+        calculo = super().create(vals)
+        
+        _logger.info("Creando modelo")
+        
+        if calculo.salario_mensual and calculo.salario_mensual > 3000:
+            _logger.info("Miro si gana mas de 3000")
+            etiqueta = self.env['calcirpf.etiqueta'].search(
+                [('nombre', '=', 'Millonario')],
+                limit=1
+            )
+            if not etiqueta:
+                etiqueta = self.env['calcirpf.etiqueta'].create({
+                    'nombre': 'Millonario',
+                    'descripcion': 'Salario mensual superior a 3000€'
+                })
+            _logger.info("Se asigna etiqueta Millonario")
+            calculo.etiquetas = [(4, etiqueta.id)]
+        elif calculo.salario_mensual and calculo.salario_mensual < 1000:
+            _logger.info("Bajo Salario")
+            #Tambien esta search_count que devuelve un numero
+            #Select * from etiqueta where nombre like 'baja'
+            # select count(*) from etiqueta where nombre like 'baja'
+            etiqueta = self.env['calcirpf.etiqueta'].search(
+                [('nombre', '=', 'Baja')],
+                limit=1
+            )
+            if not etiqueta:
+                #insert into etiqueta (..) values ('baja',)
+                etiqueta = self.env['calcirpf.etiqueta'].create({
+                    'nombre': 'Baja',
+                    'descripcion': 'Salario mensual superior a 3000€'
+                })
+            _logger.info("Se asigna etiqueta bajo")
+            calculo.etiquetas = [(4, etiqueta.id)]
+
+        return calculo
 
 
+class etiquetas(models.Model):
+    _name = 'calcirpf.etiqueta'
+    _description = 'etiqueta'
 
-
+    nombre = fields.Char()
+    descripcion = fields.Char()
 

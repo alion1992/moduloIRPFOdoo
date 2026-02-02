@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_calcirpf_responsable,calcirpf.responsable,model_calcirpf_responsable,base.group_user,1,1,1,1
 access_calcirpf_calculo,calcirpf.calculo,model_calcirpf_calculo,base.group_user,1,1,1,1
+access_calcirpf_etiqueta,calcirpf.etiqueta,model_calcirpf_etiqueta,base.group_user,1,1,1,1

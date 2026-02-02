@@ -26,6 +26,17 @@
       </field>
     </record>
 
+    <record model="ir.ui.view" id="calcirpf.calcula_list_etiqueta">
+      <field name="name">Etiqueta</field>
+      <field name="model">calcirpf.etiqueta</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="nombre"/>
+          <field name="descripcion"/>
+        </tree>
+      </field>
+    </record>
+
     <!--FORMULARIOS-->
     <record model="ir.ui.view" id="clientes_form_view">
     <field name="name">Responsable</field>
@@ -65,6 +76,7 @@
                     <field name="hijos"/>
                     <field name="pagas_extra"/>
                     <field name="responsable_id"/>
+                    <field name="etiquetas"/>
                 </group>
             </sheet>
         </form>
@@ -85,6 +97,14 @@
       <field name="res_model">calcirpf.calculo</field>
       <field name="view_mode">tree,form</field>
     </record>
+
+    <record model="ir.actions.act_window" id="calcirpf.action_window_etiqueta">
+      <field name="name">Etiqueta</field>
+      <field name="res_model">calcirpf.etiqueta</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    
 
 
     <!-- server action to the one above -->
@@ -113,12 +133,16 @@
    
     <menuitem name="Responsable" id="calcirpf.menu_1_1" parent="calcirpf.menu_1"/>
     <menuitem name="Calculadora Irpf" id="calcirpf.menu_1_2" parent="calcirpf.menu_1"/>
+    <menuitem name="Etiqueta" id="calcirpf.menu_1_3" parent="calcirpf.menu_1"/>
     
 
     <menuitem name="Responsables" id="calcirpf.menu_1_list" parent="calcirpf.menu_1_1"
               action="calcirpf.action_window"/>
     <menuitem name="Calculadora" id="calcirpf.menu_2_list" parent="calcirpf.menu_1_2"
               action="calcirpf.action_window_calc"/>
+
+    <menuitem name="Calculadora" id="calcirpf.menu_3_list" parent="calcirpf.menu_1_3"
+              action="calcirpf.action_window_etiqueta"/>
     
 
   </data>
